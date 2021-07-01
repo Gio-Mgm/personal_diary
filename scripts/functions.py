@@ -1,29 +1,16 @@
-import pandas as pd
-import json, requests
-import streamlit as st
-import joblib
+"""functions.py: Utils function for predictions."""
 
-from scripts.CONST import API_PATH
-from urllib.request import urlopen, Request
-from urllib.parse import urlencode
-from emoji import demojize
 import re
-
-def enc_values(endpoint: str, values: dict):
-    url = API_PATH + endpoint
-    data = urlencode(values).encode("latin-1")
-    req = Request(url, data=data)
-    return req  
-
-
-def dec_values(endpoint: str):
-    res = urlopen(API_PATH + endpoint)
-    string = res.read().decode("latin-1")
-    return json.loads(string)
-
+import joblib
+import pandas as pd
+from emoji import demojize
 
 def clean_str(t):
-    from nltk.corpus import stopwords
+    """
+        clean and lemmatize text
+
+    """
+
     # Lowercasing
     t = t.lower()
 
@@ -51,9 +38,14 @@ def clean_str(t):
 
 
 def bertify(x):
+    """
+        Encode lemmatized text with bert
+
+    """
+
     bert = joblib.load("models/bert.joblib")
     #bert = SentenceTransformer('paraphrase-MiniLM-L6-v2', device="cpu")
-    if type(x) == str:
+    if isinstance(x) == str:
         X = bert.encode(clean_str(x))
         X = X.reshape(1, -1)
     else:
@@ -61,7 +53,13 @@ def bertify(x):
     print("Encoded !")
     return X
 
+
 def predict(text):
+    """
+        Make predictions and return it
+        with probabilities
+    """
+
     model = joblib.load("models/LogisticRegression.joblib")
     x = bertify(text)
     pred = model.predict(x)

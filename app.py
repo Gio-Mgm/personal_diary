@@ -1,8 +1,11 @@
+"""app.py: Streamlit App"""
 
-from app_components import *
 import streamlit as st
 import requests
-from scripts.CONST import PAGES, USER_OPTIONS, ADMIN_OPTIONS, API_PATH
+from app_components import admin_add_user, admin_delete_user, admin_edit_user
+from app_components import admin_list_users, admin_mean_user, admin_mean_users
+from app_components import user_add_post, user_dashboard, user_edit_post, user_get_dates
+from scripts.CONST import NOT_DIGIT, PAGES, USER_NOT_EXISTS, USER_OPTIONS, ADMIN_OPTIONS, API_PATH
 
 
 st.set_page_config(
@@ -40,7 +43,7 @@ if page_select == PAGES[0]:
                 user_edit_post(user_id)
 
             if option == USER_OPTIONS[3]:
-                user_get_dates(user_id)   
+                user_get_dates(user_id)
 
 
 #======================= PAGE ADMINISTRATEUR =======================#
@@ -49,11 +52,11 @@ if page_select == PAGES[1]:
     st.title("Administration")
 
     #col1, col2, col3 = st.beta_columns(3)
-    
+
 #with col1:
 
     option = st.sidebar.radio("select", ADMIN_OPTIONS)
-    
+
 #with col2:
     st.subheader(option)
     if option == ADMIN_OPTIONS[0]:
@@ -63,13 +66,13 @@ if page_select == PAGES[1]:
         admin_add_user()
 
     if option == ADMIN_OPTIONS[2]:
-        admin_edit_user()    
-        
+        admin_edit_user()
+
     if option == ADMIN_OPTIONS[3]:
         admin_delete_user()
-                
+
     if option == ADMIN_OPTIONS[4]:
-        admin_mean_user()    
-        
+        admin_mean_user()
+
     if option == ADMIN_OPTIONS[5]:
         admin_mean_users()

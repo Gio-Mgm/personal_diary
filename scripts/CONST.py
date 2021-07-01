@@ -1,9 +1,11 @@
+"""CONST.py: Constantes' definition."""
+
 API_PATH = "http://127.0.0.1:8000"
 
 PAGES = ["Utilisateur", "Administrateur"]
 
 USER_OPTIONS = [
-    "Afficher le tableau de bord",
+    "Tableau de bord",
     "Ajouter un message",
     "Modifier le message du jour",
     "Lire un message à une date précise",
@@ -20,10 +22,10 @@ ADMIN_OPTIONS = [
 
 NO_POST = "Pas de message"
 NO_USER = "Pas d'utilisateur"
-MSG_ID_NOT_EXISTS = "L'ID message n'existe pas"
-MSG_ADDED = "Message ajouté"
-MSG_EDITED = "Message modifié"
-MSG_DELETED = "Message supprimé"
+POST_ID_NOT_EXISTS = "L'ID message n'existe pas"
+POST_ADDED = "Message ajouté"
+POST_EDITED = "Message modifié"
+POST_DELETED = "Message supprimé"
 NOT_DIGIT= "Veuillez entrer un nombre"
 USER_NOT_EXISTS = "L'utilisateur n'existe pas"
 EMAIL_ALREADY_EXISTS = """

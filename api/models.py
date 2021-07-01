@@ -1,9 +1,9 @@
-''' Models for SQLAlchemy'''
+"""models.py: Definition of classes for sqlalchemy"""
 
 from datetime import date
-from sqlalchemy import Column, ForeignKey, Integer, String, Boolean
+from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
-from sqlalchemy.sql.sqltypes import Float, Text, DateTime, Date
+from sqlalchemy.sql.sqltypes import Float, Text, Date
 import database as _database
 
 class User(_database.Base):

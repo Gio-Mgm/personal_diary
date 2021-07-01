@@ -1,3 +1,5 @@
+"""database.py: initialize database."""
+
 import sqlalchemy as _sql
 import sqlalchemy.ext.declarative as _declarative
 import sqlalchemy.orm as _orm
@@ -13,4 +15,3 @@ SessionLocal = _orm.sessionmaker(
 )
 
 Base = _declarative.declarative_base()
-
