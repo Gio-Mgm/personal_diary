@@ -1,9 +1,9 @@
 ''' Models for SQLAlchemy'''
 
-from datetime import datetime
+from datetime import date
 from sqlalchemy import Column, ForeignKey, Integer, String, Boolean
 from sqlalchemy.orm import relationship
-from sqlalchemy.sql.sqltypes import Float, Text, DateTime
+from sqlalchemy.sql.sqltypes import Float, Text, DateTime, Date
 import database as _database
 
 class User(_database.Base):
@@ -22,7 +22,7 @@ class User(_database.Base):
     first_name = Column(String, default="empty")
     last_name = Column(String, default="empty")
     email = Column(String, unique=True)
-    register_date = Column(DateTime, default=datetime.utcnow())
+    register_date = Column(Date, default=date.today())
 
     posts = relationship("Post", back_populates="owner")
 
@@ -42,8 +42,8 @@ class Post(_database.Base):
 
     post_id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("user.user_id"))
-    date_created = Column(DateTime, default=datetime.now())
-    date_last_updated = Column(DateTime, default=datetime.now())
+    date_created = Column(Date, default=date.today())
+    date_last_updated=Column(Date, default=date.today())
     text = Column(Text)
     major = Column(String)
     anger = Column(Float)

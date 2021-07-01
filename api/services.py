@@ -1,4 +1,5 @@
-from datetime import datetime
+from datetime import date
+from sqlalchemy import func
 import sqlalchemy.orm as _orm
 import database as _database
 import models as _models
@@ -20,8 +21,9 @@ def get_db():
 # ---------------------- #
 
 def create_user(db: _orm.Session, user: _schemas.UserCreate):
-    db_user = _models.User(email=user.email)
+    db_user = _models.User(email=user.email, first_name=user.first_name, last_name=user.last_name)
     db.add(db_user)
+    print(f"db_user: {db_user}")
     db.commit()
     db.refresh(db_user)
     return db_user
@@ -34,6 +36,27 @@ def get_users(db: _orm.Session, skip: int, limit: int):
 
 def get_user(db: _orm.Session, user_id: int):
     return db.query(_models.User).filter(_models.User.user_id == user_id).first()
+
+def get_user_post(db: _orm.Session,user_id: int):
+    return db.query(_models.Post).filter(_models.Post.user_id == user_id).order_by(_models.Post.date_last_updated.desc()).first()
+
+def get_user_post_bydate(db: _orm.Session, user_id: int, date: str):
+    return db.query(_models.Post.text).filter(_models.Post.date_last_updated == date).first()
+
+
+def update_user(db: _orm.Session, user_id: int, user: _schemas.User):
+    db_user = get_user(db=db, user_id=user_id)
+    db_user.email = user.email
+    db_user.first_name = user.fn
+    db_user.last_name = user.ln
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+
+def delete_user(db: _orm.Session, user_id: int):
+    db.query(_models.User).filter(_models.User.user_id == user_id).delete()
+    db.commit()
 
 
 # --------------------- #
@@ -52,6 +75,10 @@ def get_posts(db: _orm.Session, skip: int, limit: int):
     return db.query(_models.Post).offset(skip).limit(limit).all()
 
 
+def get_emails(db: _orm.Session):
+    return db.query(_models.User.email).all()
+
+
 def get_post(db: _orm.Session, post_id:int):
     return db.query(_models.Post).filter(_models.Post.post_id == post_id).first()
 
@@ -63,8 +90,21 @@ def delete_post(db: _orm.Session, post_id: int):
 
 def update_post(db: _orm.Session, post_id: int, post: _schemas.PostCreate):
     db_post = get_post(db=db, post_id=post_id)
+    db_post.major = post.major
     db_post.text = post.text
-    db_post.date_last_updated = datetime.utcnow()
+    db_post.worry = post.worry
+    db_post.fear = post.fear
+    db_post.neutral = post.neutral
+    db_post.sadness = post.sadness
+    db_post.hate = post.hate
+    db_post.fun = post.fun
+    db_post.happy = post.happy
+    db_post.love = post.love
+    db_post.anger = post.anger
+    db_post.date_last_updated = date.today()
     db.commit()
     db.refresh(db_post)
     return db_post
+
+def get_dates(db: _orm.Session , user_id: int):
+    return db.query(_models.Post.date_last_updated).filter(_models.Post.user_id == user_id).all()

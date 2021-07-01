@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date
 from typing import List
 from pydantic import BaseModel
 
@@ -6,19 +6,7 @@ class PostBase(BaseModel):
     text: str
 
 class PostCreate(PostBase):
-    pass
-
-class Post(PostBase):
-    post_id: int
-    user_id: int
-    date_created: datetime
-    date_last_updated: datetime
-
-    class Config:
-        orm_mode = True
-
-class PostPredictions(Post):
-    major: float
+    major: str
     anger: float
     fear: float
     fun: float
@@ -28,18 +16,28 @@ class PostPredictions(Post):
     neutral: float
     sadness: float
     worry: float
+    pass
+
+class Post(PostBase):
+
+    date_last_updated: date
+    user_id: int
+    post_id: int
+    date_created: date
+    
+    class Config:
+        orm_mode = True
 
 class UserBase(BaseModel):
     email: str
 
 class UserCreate(UserBase):
-    pass
+    first_name:str = ""
+    last_name:str = ""
 
 class User(UserBase):
     user_id: int
-    name:str = ""
-    register_date: datetime
-    posts : List[Post] = []
+    register_date: date
 
     class Config:
         orm_mode = True
