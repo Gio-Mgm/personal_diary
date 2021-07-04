@@ -12,15 +12,19 @@ USER_OPTIONS = [
 ]
 
 ADMIN_OPTIONS = [
-    "Lister utilisateurs",
+    "Gestion des utilisateurs",
+    "Analyse des sentiments"
+]
+ADMIN_SUB_OPTIONS = [
     "Ajouter utilisateur",
     "Modifier utilisateur",
     "Supprimer utilisateur",
-    "Mood of the day",
-    "Mean mood"
+    ""
 ]
 
+PROCESSING = "Requête en cours de traitement..."
 NO_POST = "Pas de message"
+NO_POST_AT_DATE = "Pas de message à cette date"
 NO_USER = "Pas d'utilisateur"
 POST_ID_NOT_EXISTS = "L'ID message n'existe pas"
 POST_ADDED = "Message ajouté"
@@ -39,3 +43,6 @@ POST_ALREADY_EXISTS = """
 USER_ADDED = "Utilisateur ajouté"
 USER_EDITED = "Utilisateur modifié"
 USER_DELETED = "Utilisateur supprimé"
+
+SENTIMENTS = ["anger", "sadness", "love", "happy",
+              "fear", "worry", "neutral", "hate", "fun"]

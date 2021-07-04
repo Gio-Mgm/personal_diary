@@ -2,9 +2,12 @@
 
 from datetime import date
 import sqlalchemy.orm as _orm
+from sqlalchemy.sql import func
+from sqlalchemy import and_
 import database as _database
 import schemas as _schemas
 import models as _models
+
 
 def create_database():
     return _database.Base.metadata.create_all(bind=_database.engine)
@@ -78,29 +81,46 @@ def get_users(db: _orm.Session, skip: int, limit: int):
     return db.query(_models.User).offset(skip).limit(limit).all()
 
 
-def get_user_post(db: _orm.Session,user_id: int):
+def get_last_post(db: _orm.Session, user_id: int):
     """
         query get last user's post
     """
 
     return (db
-        .query(_models.Post)
+        .query(_models.Post.text, _models.Post.date_last_updated)
         .filter(_models.Post.user_id == user_id)
         .order_by(_models.Post.date_last_updated.desc()).first()
     )
 
 
-def get_user_post_bydate(db: _orm.Session, user_id: int, date: str):
+
+def get_post_by_date(db: _orm.Session, user_id: int, date: str, admin: bool):
     """
-        query get post by date
+        query get a user post by date
     """
 
+    if admin:
+        return (db
+                .query(_models.Post)
+                .filter(_models.Post.user_id == user_id)
+                .filter(_models.Post.date_last_updated == date)
+                .first()
+        )
+
     return (db
-        .query(_models.Post.text)
-        .filter(_models.Post.user_id == user_id)
-        .filter(_models.Post.date_last_updated == date)
-        .first()
+            .query(_models.Post.text)
+            .filter(_models.Post.user_id == user_id)
+            .filter(_models.Post.date_last_updated == date)
+            .first()
     )
+
+
+def get_user_posts(db: _orm.Session, user_id:int):
+    """
+        query get all posts from a user
+    """
+
+    return db.query(_models.Post).filter(_models.Post.user_id == user_id).all()
 
 
 def get_post(db: _orm.Session, post_id: int):
@@ -177,3 +197,44 @@ def get_dates(db: _orm.Session, user_id: int):
     """
 
     return db.query(_models.Post.date_last_updated).filter(_models.Post.user_id == user_id).all()
+
+
+def get_mean(db: _orm.Session, user_id: int, start: str, end: str):
+    """
+        query get mean of each sentiment
+    """
+    print(user_id == True)
+    query = db.query(
+        func.avg(_models.Post.anger).label('anger'),
+        func.avg(_models.Post.sadness).label('sadness'),
+        func.avg(_models.Post.love).label('love'),
+        func.avg(_models.Post.happy).label('happy'),
+        func.avg(_models.Post.fear).label('fear'),
+        func.avg(_models.Post.worry).label('worry'),
+        func.avg(_models.Post.neutral).label('neutral'),
+        func.avg(_models.Post.hate).label('hate'),
+        func.avg(_models.Post.fun).label('fun')
+    ).filter(and_(
+        _models.Post.date_last_updated >= start,
+        _models.Post.date_last_updated <= end,
+    ))
+    
+    if user_id:
+        return query.filter(_models.Post.user_id == user_id).all()
+
+    return query.all()
+    
+
+def check_posts_dates(db, start: str, end: str,  user_id: int):
+    print(f"USER_ID : {user_id}")
+
+    query = db.query(_models.Post).filter(and_(
+        _models.Post.date_last_updated >= start,
+        _models.Post.date_last_updated <= end,
+    ))
+
+    if user_id:
+        return query.filter(_models.Post.user_id == user_id).count()
+
+    return query.count()
+

@@ -4,6 +4,7 @@ import fastapi as _fastapi
 import sqlalchemy.orm as _orm
 import services as _services
 import schemas as _schemas
+from datetime import date
 
 app = _fastapi.FastAPI()
 
@@ -29,7 +30,7 @@ def create_user(
 
 
 @app.get("/users/")
-def read_users(
+def get_users(
     skip: int=0,
     limit: int=10,
     db: _orm.Session=_fastapi.Depends(_services.get_db)
@@ -43,7 +44,7 @@ def read_users(
 
 
 @app.get("/users/{user_id}")
-def read_user(
+def get_user(
     user_id: int,
     db: _orm.Session = _fastapi.Depends(_services.get_db)
 ):
@@ -74,6 +75,22 @@ def create_post(
     return _services.create_post(db=db, post=post, user_id=user_id)
 
 
+@app.get("/users/{user_id}/posts")
+def read_posts(
+    user_id: int,
+    db: _orm.Session = _fastapi.Depends(_services.get_db)
+):
+    """
+        Route for getting all posts of a user
+    """
+
+    db_user = _services.get_user(db=db, user_id=user_id)
+    if db_user is None:
+        raise _fastapi.HTTPException(
+            status_code=404, detail="This user does not exist")
+    return _services.get_user_posts(db=db, user_id=user_id)
+
+
 @app.put("/users/{user_id}")
 def update_user(
     user_id: int,
@@ -97,10 +114,10 @@ def delete_user(user_id: int, db: _orm.Session = _fastapi.Depends(_services.get_
     return {"message": f"successfully deleted user with id: {user_id}"}
 
 
-@app.get("/users/{user_id}/post/")
-def user_read_post(
+@app.get("/users/{user_id}/last/")
+def get_last_post(
     user_id: int,
-    db:_orm.Session=_fastapi.Depends(_services.get_db)
+    db: _orm.Session = _fastapi.Depends(_services.get_db)
 ):
     """
         Route for getting last user post
@@ -109,13 +126,36 @@ def user_read_post(
     db_user = _services.get_user(db=db, user_id=user_id)
     if db_user is None:
         raise _fastapi.HTTPException(
-            status_code=404, detail="This user does not exist")
-    return _services.get_user_post(db=db, user_id=user_id)
+            status_code=404, detail="This user does not exist.")
+    return _services.get_last_post(db=db, user_id=user_id)
+
+@app.get("/posts/{user_id}/{date}/")
+def get_post_by_date(
+    user_id: int,
+    admin: bool = False,
+    date : str = str(date.today()),
+    db:_orm.Session=_fastapi.Depends(_services.get_db)
+):
+    """
+        Route for getting a user post from date
+    """
+
+    db_user = _services.get_user(db=db, user_id=user_id)
+    if db_user is None:
+        raise _fastapi.HTTPException(
+            status_code=404, detail="This user does not exist.")
+    db_post = _services.get_post_by_date(
+        db=db, user_id=user_id, date=date, admin=admin
+    )
+    if db_post is None:
+        raise _fastapi.HTTPException(
+            status_code=404, detail="No post on this date.")
+    return db_post
 
 @app.get("/posts/")
-def read_posts(
+def get_posts(
     skip: int = 0,
-    limit: int = 10,
+    limit: int = 100,
     db: _orm.Session = _fastapi.Depends(_services.get_db)
 ):
     """
@@ -127,9 +167,9 @@ def read_posts(
 
 
 @app.get("/posts/{post_id}")
-def read_post(post_id: int, db:_orm.Session = _fastapi.Depends(_services.get_db)):
+def get_post(post_id: int, db:_orm.Session = _fastapi.Depends(_services.get_db)):
     """
-        Route for getting a post
+        Route for getting a post by its id
     """
 
     post = _services.get_post(db=db, post_id=post_id)
@@ -161,7 +201,7 @@ def update_post(
 
     return _services.update_post(db=db, post=post, post_id=post_id)
 
-@app.get("/users/{user_id}/by_dates")
+@app.get("/posts/{user_id}/dates")
 def get_dates(
     user_id:int,
     db: _orm.Session = _fastapi.Depends(_services.get_db)
@@ -172,14 +212,23 @@ def get_dates(
 
     return _services.get_dates(db=db,user_id=user_id)
 
-@app.get("/users/{user_id}/by_dates/{date}")
-def get_post_bydate(
-    user_id: int,
-    date: str,
+
+@app.get("/posts/sentiments/")
+def get_sentiments(
+    start: str,
+    end: str,
+    user_id: int = None,
     db: _orm.Session = _fastapi.Depends(_services.get_db)
 ):
     """
-        Route for getting user's post from date
-    """
+        Route for getting user' mean emotion from date
 
-    return _services.get_user_post_bydate(user_id=user_id, db=db, date=date)
+    """
+    count_db = _services.check_posts_dates(
+        db=db, start=start, end=end, user_id=user_id
+    )
+    print(f"count_db : {count_db == True}")
+    if count_db == 0:
+        raise _fastapi.HTTPException(
+            status_code=404, detail="No post for this interval")
+    return _services.get_mean(db=db, start=start, end=end, user_id=user_id,)

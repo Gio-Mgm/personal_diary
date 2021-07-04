@@ -3,7 +3,9 @@
 import re
 import joblib
 import pandas as pd
+import matplotlib.pyplot as plt
 from emoji import demojize
+
 
 def clean_str(t):
     """
@@ -45,12 +47,11 @@ def bertify(x):
 
     bert = joblib.load("models/bert.joblib")
     #bert = SentenceTransformer('paraphrase-MiniLM-L6-v2', device="cpu")
-    if isinstance(x) == str:
+    if isinstance(x, str):
         X = bert.encode(clean_str(x))
         X = X.reshape(1, -1)
     else:
         X = bert.encode(x.astype('str'))
-    print("Encoded !")
     return X
 
 
@@ -66,5 +67,19 @@ def predict(text):
     prob = model.predict_proba(x)
     prob = pd.Series(data = prob[0], index=model.classes_)
     prob = prob.sort_values(ascending=False)
-    print(prob)
     return pred, prob
+
+def make_pie_chart(data):
+    rates = [v for v in data.values()]
+    plt.figure(figsize=(5, 5))
+    plt.pie(rates, normalize=True, radius=1.1, labeldistance=1.05, labels=data.keys())
+    plt.title('Répartition des émotions')
+    my_circle = plt.Circle((0, 0), .5, color='white')
+    p = plt.gcf()
+    p.gca().add_artist(my_circle)
+    plt.legend(data.items(), loc='best',
+               bbox_to_anchor=(.7, 0., 1, 0.8))
+    plt.axis('equal')
+    fig = plt.gcf()
+    plt.close()
+    return fig

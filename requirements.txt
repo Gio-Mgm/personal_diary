@@ -1,0 +1,12 @@
+
+emoji==1.2.0
+fastapi==0.65.2
+matplotlib==3.3.4
+numpy
+pandas==1.2.3
+pydantic==1.8.2
+scikit-learn
+sentence-transformers==2.0.0
+SQLAlchemy
+streamlit==0.83.0
+xgboost==1.4.2

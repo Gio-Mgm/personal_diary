@@ -1,24 +1,29 @@
 """app.py: Streamlit App"""
 
 import streamlit as st
+import time
 import requests
-from app_components import admin_add_user, admin_delete_user, admin_edit_user
-from app_components import admin_list_users, admin_mean_user, admin_mean_users
-from app_components import user_add_post, user_dashboard, user_edit_post, user_get_dates
-from scripts.CONST import NOT_DIGIT, PAGES, USER_NOT_EXISTS, USER_OPTIONS, ADMIN_OPTIONS, API_PATH
+import pandas as pd
+from app_components import admin_add_user, admin_delete_user, admin_edit_user, admin_sentiment_analysis, admin_user_mood_date
+from app_components import user_add_post, user_dashboard, user_edit_post, get_post_from_date
+from scripts.CONST import ADMIN_SUB_OPTIONS, NOT_DIGIT, PAGES, PROCESSING, USER_NOT_EXISTS, USER_OPTIONS, ADMIN_OPTIONS, API_PATH
 
 
 st.set_page_config(
     page_title="Personal_diary",
-    page_icon='random',
-    layout='wide',
+    page_icon=':neutral_face:',
+    layout='centered',
     initial_sidebar_state='expanded'
 )
 
-page_select = st.sidebar.selectbox("Pages : ", PAGES)
+if 'header' not in st.session_state:
+	st.session_state.header = ADMIN_OPTIONS[0]
+
+    
+
+page_select = st.sidebar.radio("Pages : ", PAGES)
 
 #========================== PAGE UTILISATEUR =======================#
-
 
 if page_select == PAGES[0]:
     user_id = st.sidebar.text_input("user_id")
@@ -30,7 +35,6 @@ if page_select == PAGES[0]:
             st.error(USER_NOT_EXISTS)
         else:
             res = r.json()
-            st.title("Utilisateur")
             option = st.sidebar.radio("Menu", USER_OPTIONS)
 
             if option == USER_OPTIONS[0]:
@@ -43,36 +47,56 @@ if page_select == PAGES[0]:
                 user_edit_post(user_id)
 
             if option == USER_OPTIONS[3]:
-                user_get_dates(user_id)
+                get_post_from_date(user_id)
 
 
 #======================= PAGE ADMINISTRATEUR =======================#
 
 if page_select == PAGES[1]:
-    st.title("Administration")
+    title = st.header(st.session_state.header)
+    option = st.sidebar.selectbox("Menu :", ADMIN_OPTIONS, key="header")
 
-    #col1, col2, col3 = st.beta_columns(3)
-
-#with col1:
-
-    option = st.sidebar.radio("select", ADMIN_OPTIONS)
-
-#with col2:
-    st.subheader(option)
+    with st.spinner(PROCESSING):
+        r = requests.get(API_PATH + "/users/")
+        res = r.json()
+        res = pd.DataFrame(res)
+        res = res[["user_id", "first_name",
+                   "last_name", "email", "register_date"]]
+        df = st.dataframe(res)
+    
     if option == ADMIN_OPTIONS[0]:
-        admin_list_users()
+
+        sub_option = st.selectbox("Choix de l'action à effectuer", ADMIN_SUB_OPTIONS, index=len(ADMIN_SUB_OPTIONS)-1)
+
+        if sub_option == ADMIN_SUB_OPTIONS[0]:
+            admin_add_user()
+
+        if sub_option == ADMIN_SUB_OPTIONS[1]:
+            admin_edit_user()
+
+        if sub_option == ADMIN_SUB_OPTIONS[2]:
+            admin_delete_user()
 
     if option == ADMIN_OPTIONS[1]:
-        admin_add_user()
+        admin_sentiment_analysis()
+    # st.subheader(option)
+    # if option == ADMIN_OPTIONS[0]:
+    #     admin_list_users()
 
-    if option == ADMIN_OPTIONS[2]:
-        admin_edit_user()
+    # if option == ADMIN_OPTIONS[1]:
+    #     
 
-    if option == ADMIN_OPTIONS[3]:
-        admin_delete_user()
+    # if option == ADMIN_OPTIONS[2]:
+    #     admin_edit_user()
 
-    if option == ADMIN_OPTIONS[4]:
-        admin_mean_user()
+    # if option == ADMIN_OPTIONS[3]:
+    #     admin_delete_user()
 
-    if option == ADMIN_OPTIONS[5]:
-        admin_mean_users()
+    # if option == ADMIN_OPTIONS[4]:
+    #     admin_user_mood_date()
+
+    # if option == ADMIN_OPTIONS[5]:
+    #     admin_mean_user()
+
+    # if option == ADMIN_OPTIONS[6]:
+    #     admin_mean_users()
