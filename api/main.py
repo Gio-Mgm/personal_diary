@@ -129,7 +129,7 @@ def get_last_post(
             status_code=404, detail="This user does not exist.")
     return _services.get_last_post(db=db, user_id=user_id)
 
-@app.get("/posts/{user_id}/{date}/")
+@app.get("/posts/{user_id}/date/")
 def get_post_by_date(
     user_id: int,
     admin: bool = False,
@@ -227,7 +227,7 @@ def get_sentiments(
     count_db = _services.check_posts_dates(
         db=db, start=start, end=end, user_id=user_id
     )
-    print(f"count_db : {count_db == True}")
+    
     if count_db == 0:
         raise _fastapi.HTTPException(
             status_code=404, detail="No post for this interval")

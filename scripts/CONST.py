@@ -1,13 +1,15 @@
 """CONST.py: Constantes' definition."""
 
+
 API_PATH = "http://127.0.0.1:8000"
 
-PAGES = ["Utilisateur", "Administrateur"]
+PAGES = [
+    "Utilisateur", 
+    "Administrateur"]
 
 USER_OPTIONS = [
     "Tableau de bord",
-    "Ajouter un message",
-    "Modifier le message du jour",
+    "Ajouter / Modifer message du jour",
     "Lire un message à une date précise",
 ]
 
@@ -19,8 +21,8 @@ ADMIN_SUB_OPTIONS = [
     "Ajouter utilisateur",
     "Modifier utilisateur",
     "Supprimer utilisateur",
-    ""
 ]
+
 
 PROCESSING = "Requête en cours de traitement..."
 NO_POST = "Pas de message"
@@ -46,3 +48,11 @@ USER_DELETED = "Utilisateur supprimé"
 
 SENTIMENTS = ["anger", "sadness", "love", "happy",
               "fear", "worry", "neutral", "hate", "fun"]
+
+ADD_POST = "Ajouter message du jour"
+EDIT_POST = "Modifier message du jour"
+
+
+USER_HEADER = "Personal Diary"
+USER_SUBHEADER="Pour commencer, entrez votre identifiant"
+
