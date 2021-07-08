@@ -94,14 +94,16 @@ def read_posts(
 @app.put("/users/{user_id}")
 def update_user(
     user_id: int,
-    user: _schemas.User,
+    first_name: str, 
+    last_name: str,
+    email: str,
     db: _orm.Session = _fastapi.Depends(_services.get_db),
 ):
     """
         Route for updating user
     """
 
-    return _services.update_user(db=db, user=user, user_id=user_id)
+    return _services.update_user(db=db, user_id=user_id, first_name=first_name, last_name=last_name, email=email)
 
 
 @app.delete("/users/{user_id}")
@@ -133,13 +135,12 @@ def get_last_post(
 def get_post_by_date(
     user_id: int,
     admin: bool = False,
-    date : str = str(date.today()),
+    date : date = date.today(),
     db:_orm.Session=_fastapi.Depends(_services.get_db)
 ):
     """
         Route for getting a user post from date
     """
-
     db_user = _services.get_user(db=db, user_id=user_id)
     if db_user is None:
         raise _fastapi.HTTPException(
@@ -149,7 +150,7 @@ def get_post_by_date(
     )
     if db_post is None:
         raise _fastapi.HTTPException(
-            status_code=404, detail="No post on this date.")
+            status_code=404, detail="Pas de message à cette date.")
     return db_post
 
 @app.get("/posts/")

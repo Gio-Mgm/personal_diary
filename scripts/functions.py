@@ -45,8 +45,8 @@ def bertify(x):
 
     """
 
+    # SentenceTransformer('paraphrase-MiniLM-L6-v2')
     bert = joblib.load("models/bert.joblib")
-    #bert = SentenceTransformer('paraphrase-MiniLM-L6-v2', device="cpu")
     if isinstance(x, str):
         X = bert.encode(clean_str(x))
         X = X.reshape(1, -1)
@@ -69,15 +69,22 @@ def predict(text):
     prob = prob.sort_values(ascending=False)
     return pred, prob
 
+
 def make_pie_chart(data):
-    rates = [v for v in data.values()]
+    """
+        Plot a pie chart of sentiments
+    
+    """
+    
+    rates = data.values()
     plt.figure(figsize=(5, 5))
     plt.pie(rates, normalize=True, radius=1.1, labeldistance=1.05, labels=data.keys())
     plt.title('Répartition des émotions')
     my_circle = plt.Circle((0, 0), .5, color='white')
     p = plt.gcf()
     p.gca().add_artist(my_circle)
-    plt.legend(data.items(), loc='best',
+    labels = [f"{item[0]} : {round(item[1], 2)}%" for item in data.items()]
+    plt.legend(labels, loc='best',
                bbox_to_anchor=(.7, 0., 1, 0.8))
     plt.axis('equal')
     fig = plt.gcf()

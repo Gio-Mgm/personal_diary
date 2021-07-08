@@ -1,10 +1,10 @@
-"""CONST.py: Constantes' definition."""
+"""CONST.py: Constants' definition."""
 
 
 API_PATH = "http://127.0.0.1:8000"
 
 PAGES = [
-    "Utilisateur", 
+    "Utilisateur",
     "Administrateur"]
 
 USER_OPTIONS = [
@@ -18,6 +18,7 @@ ADMIN_OPTIONS = [
     "Analyse des sentiments"
 ]
 ADMIN_SUB_OPTIONS = [
+    "Fiche utilisateur",
     "Ajouter utilisateur",
     "Modifier utilisateur",
     "Supprimer utilisateur",

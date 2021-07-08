@@ -50,15 +50,15 @@ def create_user(db: _orm.Session, user: _schemas.UserCreate):
     return db_user
 
 
-def update_user(db: _orm.Session, user_id: int, user: _schemas.User):
+def update_user(db: _orm.Session, user_id: int, first_name: str, last_name: str, email: str):
     """
         query update user
     """
 
     db_user = get_user(db=db, user_id=user_id)
-    db_user.email = user.email
-    db_user.first_name = user.fn
-    db_user.last_name = user.ln
+    db_user.email = email
+    db_user.first_name = first_name
+    db_user.last_name = last_name
     db.commit()
     db.refresh(db_user)
     return db_user
@@ -98,13 +98,13 @@ def get_post_by_date(db: _orm.Session, user_id: int, date: str, admin: bool):
     """
         query get a user post by date
     """
-
+    
     if admin:
         return (db
-                .query(_models.Post)
-                .filter(_models.Post.user_id == user_id)
-                .filter(_models.Post.date_last_updated == date)
-                .first()
+            .query(_models.Post)
+            .filter(_models.Post.user_id == user_id)
+            .filter(_models.Post.date_last_updated == date)
+            .first()
         )
 
     return (db

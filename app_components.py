@@ -7,6 +7,7 @@ from datetime import date, timedelta
 from scripts.CONST import ADD_POST, API_PATH, EDIT_POST, EMAIL_ALREADY_EXISTS, NOT_DIGIT, NO_POST, NO_POST_AT_DATE, PROCESSING, SENTIMENTS
 from scripts.CONST import POST_ALREADY_EXISTS, POST_ADDED, POST_EDITED
 from scripts.CONST import USER_ADDED, USER_DELETED, USER_EDITED, USER_NOT_EXISTS
+#import scripts.CONST as C
 from scripts.functions import make_pie_chart, predict
 
 class UserComponents():
@@ -16,7 +17,7 @@ class UserComponents():
     @staticmethod
     def dashboard(state):
         """
-            user's dashboard view
+            dashboard view
         """
         user = state.user
         user_id = state.user_id
@@ -37,13 +38,17 @@ class UserComponents():
 
     @staticmethod
     def add_edit_post(state):
-        user_id = int(state.user_id)
-        r = requests.get(API_PATH + f"/users/{user_id}/date/")
-        st.write(r.status_code)
-        st.write(r.text)
+        """
+            add edit post view
+        
+        """
+        
+        user_id = state.user_id
+        r = requests.get(API_PATH + f"/posts/{user_id}/date/")
         is_add = False
         if r.status_code == 404:
             is_add = True
+            st.warning(NO_POST)
         else:
             res = r.json()
             st.markdown(f"> {res[0]}")
@@ -99,9 +104,45 @@ class AdminComponents():
         pass
 
     @staticmethod
+    def get_user_infos():
+        """
+            get user's information and posts
+        
+        """
+        bc = st.beta_container()
+        user_id = bc.text_input("ID de l'utilisateur")
+        if user_id:
+            r = requests.get(API_PATH + f"/users/{user_id}")
+            if not user_id.isdigit():
+                bc.error(NOT_DIGIT)
+            elif r.status_code == 404:
+                bc.error(USER_NOT_EXISTS)
+            else:
+                res = r.json()
+                col1, col2 = bc.beta_columns([.6, 1.4])
+                with col1:
+                    st.subheader("Informations personnelles")
+                    st.markdown(f"_Prénom_ : {res['first_name']}")
+                    st.markdown(f"_Nom_ : {res['last_name']}")
+                    st.markdown(f"_Email_ : {res['email']}")
+                    st.markdown(f"_Inscrit le_ : {res['register_date']}")
+                r = requests.get(API_PATH + f"/users/{user_id}/posts")
+                results = r.json()
+                if results:
+                    with col2:
+                        for res in results:
+                            st.markdown(f"> {res['text']}")
+                            st.markdown(f"_Édité le : {res['date_last_updated']}_")
+                            st.markdown(f"_Sentiment majoritaire : {res['major']}_")
+                            st.markdown("___")
+                else:
+                    bc.warning(NO_POST)
+        return bc
+
+    @staticmethod
     def add_user():
         """
-            admin's add user view
+            add user view
         """
 
         with st.form("Add user"):
@@ -126,7 +167,7 @@ class AdminComponents():
     @staticmethod
     def edit_user():
         """
-            admin's edit user view
+            edit user view
         """
 
         bc = st.beta_container()
@@ -151,14 +192,14 @@ class AdminComponents():
                             'first_name': fn,
                             'last_name': ln
                         }
-                        r = requests.put(API_PATH + "/users", json=data)
+                        r = requests.put(API_PATH + f"/users/{user_id}", params=data)
                         bc.info(USER_EDITED)
         return bc
 
     @staticmethod
     def delete_user():
         """
-            admin's delete user view
+            delete user view
         """
 
         bc = st.beta_container()
@@ -178,45 +219,6 @@ class AdminComponents():
 
 
     @staticmethod
-    def user_sentiment():
-        """
-            visualize text and emotions of an user
-            at a precise date
-        """
-        import matplotlib.pyplot as plt
-        bc = st.beta_container()
-        col1, col2 = st.beta_columns(2)
-        user_id = bc.text_input("ID de l'utilisateur")
-        if user_id:
-            r = requests.get(API_PATH + f"/users/{user_id}/posts")
-            if not user_id.isdigit():
-                return bc.error(NOT_DIGIT)
-            elif r.status_code == 404:
-                return bc.error(USER_NOT_EXISTS)
-            elif not r.json():
-                return bc.warning(NO_POST)
-            res = r.json()
-            dates = []
-            for el in res:
-                dates.append(el["date_last_updated"])
-            with col1:
-                date = bc.selectbox("Choisissez une date", dates)
-                if date:
-                    params = {
-                        "user_id": user_id,
-                        "date": date,
-                        "admin": True
-                    }               
-                    r = requests.get(API_PATH + "/posts/user_id/date/", params=params)
-                    res= r.json()
-                    sub_res = {key: round(val,3) for key, val in res.items() if key in SENTIMENTS}
-                st.markdown(f"> {res['text']}")
-                st.markdown(f"_Sentiment majoritaire : {res['major']}_")
-            with col2:
-                st.pyplot(make_pie_chart(sub_res))
-        return bc
-
-    @staticmethod
     def mean_sentiments():
         """
             sentiment analysis view
@@ -229,7 +231,7 @@ class AdminComponents():
             if checked:
                 user_id = st.text_input("ID de l'utilisateur")
             dates = st.date_input("Choix de la période", value=(
-                date.today() - timedelta(days=1), date.today()
+                date.today() - timedelta(days=7), date.today()
             ), max_value=date.today())
             submitted = st.form_submit_button("Submit")
         if submitted:
@@ -250,6 +252,7 @@ class AdminComponents():
             
             if r.status_code == 200:
                 res = r.json()[0]
-                s = pd.Series(res, index=SENTIMENTS)
-                st.dataframe(s)
-                st.markdown(f"_Sentiment majoritaire : {s.idxmax()}_")
+                res_dict = dict(zip(SENTIMENTS, res))
+                max_key = max(res_dict, key=res_dict.get)
+                st.markdown(f"_Sentiment majoritaire : {max_key}_")
+                st.pyplot(make_pie_chart(res_dict))

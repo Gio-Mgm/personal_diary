@@ -1,4 +1,11 @@
 _pycache_
+.vscode
 api/_pycache_
 scripts/_pycache_
+scripts/data_cleaning.py
+scripts/data_splitting.ipynb
+scripts/data_splitting.py
 sqlite.py
+data
+models/xgboost.joblib
+notebooks

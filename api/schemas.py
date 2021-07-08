@@ -17,7 +17,6 @@ class PostCreate(PostBase):
     neutral: float
     sadness: float
     worry: float
-    pass
 
 class Post(PostBase):
 
@@ -28,6 +27,9 @@ class Post(PostBase):
     
     class Config:
         orm_mode = True
+
+
+
 
 class UserBase(BaseModel):
     email: str
