@@ -11,8 +11,10 @@
     |   │   ├── schemas.py              # classes declaration for pydantic
     |   │   └── services.py             # services for API requests
     |   └── utils
-    |       ├── CONST.py                # constants
-    |       └── functions.py            # utils functions
+    |   |   ├── CONST.py                # constants
+    |   |   └── functions.py            # utils functions
+    |   └── test
+    |   │   └── test_api.py             # unit tests
     ├── app_components.py               # components for streamlit
     ├── app.py                          # streamlit application
     ├── README.md
