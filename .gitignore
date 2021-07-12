@@ -1,5 +1,5 @@
 .vscode
-**/_pycache_
+**/__pycache__
 data
 models/xgboost.joblib
 test/.pytest_cache
