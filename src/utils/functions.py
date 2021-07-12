@@ -83,7 +83,7 @@ def make_pie_chart(data):
     my_circle = plt.Circle((0, 0), .5, color='white')
     p = plt.gcf()
     p.gca().add_artist(my_circle)
-    labels = [f"{item[0]} : {round(item[1], 2)}%" for item in data.items()]
+    labels = [f"{item[0]} : {round(item[1]*100, 2)}%" for item in data.items()]
     plt.legend(labels, loc='best',
                bbox_to_anchor=(.7, 0., 1, 0.8))
     plt.axis('equal')

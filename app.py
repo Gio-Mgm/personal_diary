@@ -3,8 +3,8 @@
 import streamlit as st
 import requests
 import pandas as pd
+import src.utils.CONST as c
 from app_components import UserComponents as uc, AdminComponents as ac
-import scripts.CONST as c
 
 # streamlit settings
 st.set_page_config(

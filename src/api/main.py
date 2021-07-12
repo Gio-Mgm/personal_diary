@@ -18,15 +18,8 @@ def create_user(
     """
         Route for creating user
     """
-
-    db_emails = _services.get_emails(db=db)
-    emails = []
-    for email in db_emails:
-        emails.append(email[0])
-    if user.email in emails:
-        raise _fastapi.HTTPException(
-            status_code=500, detail="email already in use")
-    return _services.create_user(db=db, user=user)
+    response = _services.create_user(db=db, user=user)
+    return response
 
 
 @app.get("/users/")
@@ -55,6 +48,7 @@ def get_user(
     db_user = _services.get_user(db=db, user_id=user_id)
     if db_user is None:
         raise _fastapi.HTTPException(status_code=404, detail="This user does not exist")
+    print(db_user)
     return db_user
 
 

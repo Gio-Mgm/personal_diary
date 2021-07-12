@@ -1,12 +1,15 @@
 """services.py: Functions for creating queries."""
-
-from datetime import date
-import sqlalchemy.orm as _orm
-from sqlalchemy.sql import func
-from sqlalchemy import and_
+import sys
+sys.path.insert(0, "../utils")
 import database as _database
 import schemas as _schemas
 import models as _models
+import sqlalchemy.orm as _orm
+from sqlalchemy import and_
+from sqlalchemy.sql import func
+from sqlalchemy.exc import IntegrityError
+from datetime import date
+from CONST import EMAIL_ALREADY_EXISTS, USER_ADDED
 
 
 def create_database():
@@ -37,15 +40,17 @@ def create_user(db: _orm.Session, user: _schemas.UserCreate):
     """
         query create user
     """
-
     db_user = _models.User(
         email=user.email,
         first_name=user.first_name,
         last_name=user.last_name
     )
     db.add(db_user)
-    print(f"db_user: {db_user}")
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        return EMAIL_ALREADY_EXISTS
     db.refresh(db_user)
     return db_user
 
@@ -183,14 +188,6 @@ def get_posts(db: _orm.Session, skip: int, limit: int):
     return db.query(_models.Post).offset(skip).limit(limit).all()
 
 
-def get_emails(db: _orm.Session):
-    """
-        query get list of emails
-    """
-
-    return db.query(_models.User.email).all()
-
-
 def get_dates(db: _orm.Session, user_id: int):
     """
         query get list of dates from posts
@@ -203,7 +200,6 @@ def get_mean(db: _orm.Session, user_id: int, start: str, end: str):
     """
         query get mean of each sentiment
     """
-    print(user_id == True)
     query = db.query(
         func.avg(_models.Post.anger).label('anger'),
         func.avg(_models.Post.sadness).label('sadness'),
@@ -226,7 +222,6 @@ def get_mean(db: _orm.Session, user_id: int, start: str, end: str):
     
 
 def check_posts_dates(db, start: str, end: str,  user_id: int):
-    print(f"USER_ID : {user_id}")
 
     query = db.query(_models.Post).filter(and_(
         _models.Post.date_last_updated >= start,

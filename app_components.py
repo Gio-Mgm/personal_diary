@@ -3,12 +3,9 @@
 import streamlit as st
 import pandas as pd
 import requests
+from src.utils.CONST import *
 from datetime import date, timedelta
-from scripts.CONST import ADD_POST, API_PATH, EDIT_POST, EMAIL_ALREADY_EXISTS, NOT_DIGIT, NO_POST, NO_POST_AT_DATE, PROCESSING, SENTIMENTS
-from scripts.CONST import POST_ALREADY_EXISTS, POST_ADDED, POST_EDITED
-from scripts.CONST import USER_ADDED, USER_DELETED, USER_EDITED, USER_NOT_EXISTS
-#import scripts.CONST as C
-from scripts.functions import make_pie_chart, predict
+from src.utils.functions import make_pie_chart, predict
 
 class UserComponents():
     def __init__(self):
@@ -24,9 +21,9 @@ class UserComponents():
         bc = st.beta_container()
         bc.markdown(f"# _Bonjour {user['first_name']} {user['last_name']} !_")
         bc.markdown("________")
-        st.markdown(f"_Email_ : {user['email']}")
-        st.markdown(f"_Date d'inscription_ : {user['register_date']}")
-        st.subheader("Dernier message")
+        bc.markdown(f"_Email_ : {user['email']}")
+        bc.markdown(f"_Date d'inscription_ : {user['register_date']}")
+        bc.subheader("Dernier message")
         r = requests.get(API_PATH + f"/users/{user_id}/last/")
         res = r.json()
         if res:
@@ -34,7 +31,6 @@ class UserComponents():
             st.markdown(f"_Édité le : {res[1]}_")
         else:
             st.warning(NO_POST)
-        return bc
 
     @staticmethod
     def add_edit_post(state):
@@ -77,7 +73,7 @@ class UserComponents():
     @staticmethod
     def get_post(state):
         """
-            user's get post from date
+            user's get post from date view
         """
         user_id = state.user_id
         bc = st.beta_container()
@@ -93,7 +89,9 @@ class UserComponents():
             params = {
                 "date":date
             }
-            r = requests.get(API_PATH + f"/posts/{user_id}/date", params=params)
+            r = requests.get(
+                API_PATH + f"/posts/{user_id}/date", params=params
+            )
             bc.markdown(f"> {r.json()[0]}")
         return bc
 
@@ -137,7 +135,6 @@ class AdminComponents():
                             st.markdown("___")
                 else:
                     bc.warning(NO_POST)
-        return bc
 
     @staticmethod
     def add_user():
@@ -158,8 +155,10 @@ class AdminComponents():
                     'last_name': ln
                 }
                 r = requests.post(API_PATH + "/users/", json=data)
-                if r.status_code == 500:
-                    st.error(EMAIL_ALREADY_EXISTS)
+                res = r.json()
+                st.write(res)
+                if res == EMAIL_ALREADY_EXISTS:
+                    st.error(res)
                 else:
                     st.info(USER_ADDED)
 
@@ -192,9 +191,11 @@ class AdminComponents():
                             'first_name': fn,
                             'last_name': ln
                         }
-                        r = requests.put(API_PATH + f"/users/{user_id}", params=data)
+                        r = requests.put(
+                            API_PATH + f"/users/{user_id}", params=data
+                        )
                         bc.info(USER_EDITED)
-        return bc
+
 
     @staticmethod
     def delete_user():
@@ -215,7 +216,7 @@ class AdminComponents():
                 else:
                     r = requests.delete(API_PATH + f"/users/{user_id}")
                     bc.info(USER_DELETED)
-        return bc
+
 
 
     @staticmethod
@@ -224,7 +225,6 @@ class AdminComponents():
             sentiment analysis view
         
         """
-        #bc = st.beta_container()
         user_id = None
         checked = st.checkbox("Restreindre la requête à un utilisateur unique")
         with st.form("sentiment_analysis"):

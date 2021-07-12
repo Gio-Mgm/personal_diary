@@ -10,3 +10,4 @@ sentence-transformers==2.0.0
 SQLAlchemy
 streamlit==0.83.0
 xgboost==1.4.2
+sqlalchemy-utils
